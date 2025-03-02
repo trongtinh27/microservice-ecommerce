@@ -1,0 +1,25 @@
+server:
+  port: 8082
+
+app:
+  services:
+    user: http://localhost:8081/user
+    product: http://localhost:8083/product
+  white-list: "/seller/register,"
+  black-list: "/seller/orders,/seller/orders/**,/seller/products,/seller/products/**"
+
+
+spring:
+  application:
+    name: shop-service
+
+  datasource:
+    url: "jdbc:mysql://127.0.0.1:3306/shop_service"
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+jwt:
+  accessKey: c2VjcmV0QGtleS5hcGlfaGFzX2JlZW5fZGVzaWduZWRfYnlfVGF5TFE=

@@ -1,0 +1,22 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: product_service
+  data:
+    mongodb:
+      uri: mongodb://root:admin@localhost:27017/db_product?authSource=admin
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration  # ? T?t SQL database
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+app:
+
+  white-list: ","
+  black-list: "/product/**,"
+
+jwt:
+  accessKey: c2VjcmV0QGtleS5hcGlfaGFzX2JlZW5fZGVzaWduZWRfYnlfVGF5TFE=
