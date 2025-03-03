@@ -5,6 +5,7 @@ import com.ecommerce.user_service.util.Gender;
 import com.ecommerce.user_service.util.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Entity
 @ToString
+@DynamicUpdate
 @Table(name = "tbl_user")
 public class User extends AbstractEntity<Long> implements UserDetails, Serializable {
 

@@ -35,11 +35,15 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/auth/login",
             "/auth/logout",
             "/auth/refresh",
+            "/seller/register"
     };
 
     private static final Map<String, String> PERMISSION_MAP = Map.of(
             "/user/.*", "UPDATE_PROFILE",
-            "/seller/.*", "MANAGE_OWN_PRODUCTS",
+            "/seller/orders", "MANAGE_OWN_PRODUCTS",
+            "/seller/orders/.*", "MANAGE_OWN_PRODUCTS",
+            "/seller/products", "MANAGE_OWN_PRODUCTS",
+            "/seller/products/.*", "MANAGE_OWN_PRODUCTS",
             "/admin/.*", "MANAGE_USERS",
             "/super-admin/admins", "EDIT_ADMIN",
             "/super-admin/admins/.*", "EDIT_ADMIN"
@@ -50,8 +54,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         log.info("------------AuthenticationFilter-------------");
-
-        if(isPublicEndpoint(exchange.getRequest())) return chain.filter(exchange);
+        if(isPublicEndpoint(exchange.getRequest())){
+            return chain.filter(exchange);
+        }
 
         // Get Token form header
         List<String> header = exchange.getRequest().getHeaders().get(AUTHORIZATION);

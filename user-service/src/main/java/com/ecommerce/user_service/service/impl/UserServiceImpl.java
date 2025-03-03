@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.ecommerce.user_service.util.UserStatus.*;
@@ -123,11 +124,12 @@ public class UserServiceImpl implements UserService {
         // Dùng Map với generic <T> để đảm bảo kiểu dữ liệu đúng
         List<Runnable> updates = new ArrayList<>();
 
-        addUpdateIfNotNull(request.getFullName(), user::setFullName, updates);
-        addUpdateIfNotNull(request.getEmail(), user::setEmail, updates);
-        addUpdateIfNotNull(request.getPhone(), user::setPhone, updates);
-        addUpdateIfNotNull(request.getDateOfBirth(), user::setDateOfBirth, updates);
-        addUpdateIfNotNull(request.getGender(), user::setGender, updates);
+        addUpdateIfChanged(request.getFullName(), user::getFullName, user::setFullName, updates);
+
+        addUpdateIfChanged(request.getEmail(), user::getEmail, user::setEmail, updates);
+        addUpdateIfChanged(request.getPhone(), user::getPhone, user::setPhone, updates);
+        addUpdateIfChanged(request.getDateOfBirth(), user::getDateOfBirth, user::setDateOfBirth, updates);
+        addUpdateIfChanged(request.getGender(), user::getGender, user::setGender, updates);
 
         if (!updates.isEmpty()) {
             updates.forEach(Runnable::run); // Cập nhật tất cả giá trị thay đổi
@@ -228,6 +230,14 @@ public class UserServiceImpl implements UserService {
             updates.add(() -> setter.accept(value));
         }
     }
+
+    private <T> void addUpdateIfChanged(T newValue, Supplier<T> currentGetter, Consumer<T> updater, List<Runnable> updates) {
+        if (newValue != null && !newValue.equals(currentGetter.get())) {
+            updates.add(() -> updater.accept(newValue));
+        }
+    }
+
+
 
     @Override
     public UserStatus changeStatus(long userId, UserStatus status) {

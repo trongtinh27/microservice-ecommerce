@@ -39,12 +39,12 @@ public class JwtServiceImpl implements JwtService {
     private String refreshKey;
 
     @Override
-    public String generateToken(UserDetails user) {
+    public String generateToken(User user) {
         return generateToken(new HashMap<>(), user);
     }
 
     @Override
-    public String generateRefreshToken(UserDetails user) {
+    public String generateRefreshToken(User user) {
         return generateRefreshToken(new HashMap<>(), user);
     }
 
@@ -60,35 +60,35 @@ public class JwtServiceImpl implements JwtService {
     }
 
 
-    private String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        if (userDetails instanceof User) {
-            List<String> roles = ((User) userDetails).getAuthorities()
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-            claims.put("roles", roles); // ✅ Thêm danh sách role vào token
-        }
+    private String generateToken(Map<String, Object> claims, User user) {
+        assert user != null;
+        List<String> roles = user.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        claims.put("roles", roles);
+        claims.put("id", user.getId());
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *expiryHour))
                 .signWith(getKey(ACCESS_TOKEN), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    private String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails) {
-        if (userDetails instanceof User) {
-            List<String> roles = ((User) userDetails).getAuthorities()
+    private String generateRefreshToken(Map<String, Object> claims, User user) {
+        assert user != null;
+            List<String> roles = user.getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
-            claims.put("roles", roles); // ✅ Thêm role vào refresh token
+            claims.put("roles", roles);
+            claims.put("id", user.getId());
 
-        }
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * expiryDay))
                 .signWith(getKey(REFRESH_TOKEN), SignatureAlgorithm.HS256)

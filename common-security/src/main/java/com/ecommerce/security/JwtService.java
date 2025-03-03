@@ -36,6 +36,12 @@ public class JwtService {
         return Collections.emptyList(); // Trả về danh sách rỗng nếu không hợp lệ
     }
 
+    public long extractUserId(String token) {
+        Claims claims = extractAllClaim(token);
+        System.out.println(claims);
+        return claims.get("id", Long.class);
+    }
+
     public boolean isTokenValid(String token, String username) {
         return (username.equals(extractUsername(token)) && !isTokenExpired(token));
     }

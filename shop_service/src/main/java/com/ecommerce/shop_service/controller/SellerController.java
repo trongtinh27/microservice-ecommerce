@@ -1,5 +1,6 @@
 package com.ecommerce.shop_service.controller;
 
+import com.ecommerce.shop_service.dto.request.EditProductRequest;
 import com.ecommerce.shop_service.dto.request.ProductRequest;
 import com.ecommerce.shop_service.dto.request.SignUpRequest;
 import com.ecommerce.shop_service.service.ProductService;
@@ -42,21 +43,20 @@ public class SellerController {
 
     @PostMapping("/products")
     @PreAuthorize("hasAnyAuthority('Seller', 'Admin', 'Super Admin')")
-    public ResponseEntity<?> postNewProduct(@RequestBody ProductRequest request) {
-        System.out.println("Request: " + request);
-        return new ResponseEntity<>(productService.addProduct(request), OK);
+    public ResponseEntity<?> postNewProduct(HttpServletRequest httpServletRequest, @RequestBody ProductRequest request) {
+        return new ResponseEntity<>(productService.addProduct(httpServletRequest, request), OK);
     }
 
     @PutMapping("/products/{id}")
     @PreAuthorize("hasAnyAuthority('Seller', 'Admin', 'Super Admin')")
-    public ResponseEntity<?> editProduct(@PathVariable Long id, @RequestBody Object request) {
-        return new ResponseEntity<>(null, OK);
+    public ResponseEntity<?> editProduct(HttpServletRequest httpServletRequest, @PathVariable String id, @RequestBody EditProductRequest request) {
+        return new ResponseEntity<>(productService.editProduct(httpServletRequest, id, request), OK);
     }
 
     @DeleteMapping("/products/{id}")
-    @PreAuthorize("hasAnyAuthority('Seller', 'Admin', 'Super Admin')")
-    public ResponseEntity<?> deletedProduct(@PathVariable Long id) {
-        return new ResponseEntity<>(null, OK);
+    @PreAuthorize("hasAnyAuthority('Seller')")
+    public ResponseEntity<?> deletedProduct(@PathVariable String id, HttpServletRequest httpServletRequest) {
+        return new ResponseEntity<>(productService.deleteProduct(httpServletRequest, id), OK);
     }
 
 

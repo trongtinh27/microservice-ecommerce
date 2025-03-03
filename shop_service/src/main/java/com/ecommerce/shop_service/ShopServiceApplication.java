@@ -5,11 +5,10 @@ import com.ecommerce.security.PreFilter;
 import com.ecommerce.security.SecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
+@SpringBootApplication
 @Import({SecurityConfig.class, PreFilter.class, JwtService.class})
 @EnableFeignClients
 public class ShopServiceApplication {

@@ -39,7 +39,7 @@ public class AppConfig {
                                         "/auth/login",
                                         "/auth/refresh",
                                         "/auth/introspect",
-                                        "/user/seller-register"
+                                        "/user/seller-register",
                                         };
 
     @Bean

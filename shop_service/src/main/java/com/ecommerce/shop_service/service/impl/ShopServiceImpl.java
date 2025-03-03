@@ -1,5 +1,6 @@
 package com.ecommerce.shop_service.service.impl;
 
+import com.ecommerce.security.JwtService;
 import com.ecommerce.shop_service.dto.request.SignUpRequest;
 import com.ecommerce.shop_service.dto.response.ShopDetailResponse;
 import com.ecommerce.shop_service.dto.response.UserDetailResponse;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final UserClient userClient;
+    private final JwtService jwtService;
+
     @Override
     public ShopDetailResponse sellerRegister(SignUpRequest request) {
         try {
@@ -46,7 +49,8 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public ShopDetailResponse getShopByOwner(long ownerId) {
+    public ShopDetailResponse getShopByToken(String token) {
+        long ownerId = getOwnerIdFromToken(token);
         Shop shop = shopRepository.findShopByOwnerId(ownerId);
 
         if(shop == null) throw new ResourceNotFoundException("Shop not found");
@@ -59,4 +63,14 @@ public class ShopServiceImpl implements ShopService {
                 .createDate(shop.getCreatedAt())
                 .build();
     }
+
+    private long getOwnerIdFromToken(String token) {
+        try {
+            return jwtService.extractUserId(token);
+        } catch (Exception e) {
+            throw new InvalidDataException("Invalid token");
+        }
+    }
+
+
 }

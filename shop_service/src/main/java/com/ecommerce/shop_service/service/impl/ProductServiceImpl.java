@@ -1,5 +1,8 @@
 package com.ecommerce.shop_service.service.impl;
 
+import com.ecommerce.security.JwtService;
+import com.ecommerce.shop_service.dto.request.DeleteProductRequest;
+import com.ecommerce.shop_service.dto.request.EditProductRequest;
 import com.ecommerce.shop_service.dto.request.ProductRequest;
 import com.ecommerce.shop_service.dto.response.ProductResponse;
 import com.ecommerce.shop_service.dto.response.ShopDetailResponse;
@@ -9,6 +12,7 @@ import com.ecommerce.shop_service.repository.httpClient.ProductClient;
 import com.ecommerce.shop_service.repository.httpClient.UserClient;
 import com.ecommerce.shop_service.service.ProductService;
 import com.ecommerce.shop_service.service.ShopService;
+import feign.FeignException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +24,42 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
     private final ProductClient productClient;
-    private final UserClient userClient;
     private final ShopService shopService;
+
     @Override
-    public ProductResponse addProduct(ProductRequest productRequest) {
-        UserDetailResponse owner = userClient.getProfile().getBody();
-        if(owner == null) throw new ResourceNotFoundException("Owner not found");
-        ShopDetailResponse shopDetailResponse = shopService.getShopByOwner(owner.getId());
+    public ProductResponse addProduct(HttpServletRequest httpServletRequest, ProductRequest productRequest) {
+        String token = httpServletRequest.getHeader("Authorization").substring("Bearer ".length());
+        ShopDetailResponse shopDetailResponse = shopService.getShopByToken(token);
         productRequest.setShopId(String.valueOf(shopDetailResponse.getId()));
 
         return productClient.createProduct(productRequest).getBody();
     }
+
+    @Override
+    public ProductResponse editProduct(HttpServletRequest httpServletRequest, String id, EditProductRequest request) {
+        String token = httpServletRequest.getHeader("Authorization").substring("Bearer ".length());
+        ShopDetailResponse shopDetailResponse = shopService.getShopByToken(token);
+        request.setId(id);
+        request.setShopId(String.valueOf(shopDetailResponse.getId()));
+
+        try {
+            return productClient.editProduct(request);
+        } catch (FeignException e){
+            throw new ResourceNotFoundException("Product not found");
+        }
+    }
+
+    @Override
+    public String deleteProduct(HttpServletRequest httpServletRequest, String id) {
+        String token = httpServletRequest.getHeader("Authorization").substring("Bearer ".length());
+        ShopDetailResponse shopDetailResponse = shopService.getShopByToken(token);
+        DeleteProductRequest request = DeleteProductRequest.builder()
+                .productId(id)
+                .shopId(String.valueOf(shopDetailResponse.getId()))
+                .build();
+
+        return productClient.deleteProduct(request);
+
+    }
+
 }
