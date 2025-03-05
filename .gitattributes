@@ -1,1 +1,1 @@
-   *.yaml filter=sensitive
+   *.yaml filter=hide_secrets
