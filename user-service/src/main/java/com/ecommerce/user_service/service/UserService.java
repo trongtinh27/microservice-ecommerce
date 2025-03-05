@@ -31,5 +31,4 @@ public interface UserService {
     List<String> findAllRolesByUserId(long userId);
     Set<String> findPermissionsByRoles(List<String> role);
     User getUserById(long userId);
-
 }
