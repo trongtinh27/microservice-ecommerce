@@ -19,4 +19,4 @@ app:
   black-list: "/product/**,"
 
 jwt:
-  accessKey: c2VjcmV0QGtleS5hcGlfaGFzX2JlZW5fZGVzaWduZWRfYnlfVGF5TFE=
+   ******

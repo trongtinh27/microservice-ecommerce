@@ -31,8 +31,8 @@ app:
   black-list: "/notification/**,"
 
 jwt:
-  accessKey: c2VjcmV0QGtleS5hcGlfaGFzX2JlZW5fZGVzaWduZWRfYnlfVGF5TFE=
+   ******
 
 email:
-  sender-email: tinhsinh2002@gmail.com
-  api-key: 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
+   ******
+   ******
