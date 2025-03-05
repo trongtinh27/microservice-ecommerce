@@ -31,8 +31,8 @@ app:
   black-list: "/notification/**,"
 
 jwt:
-   ******
+  accessKey: ${ACCESS_KEY}
 
 email:
-   ******
-   ******
+  sender-email: ${BREVO_EMAIL}
+  api-key: ${BREVO_API-KEY}

@@ -18,5 +18,9 @@ spring:
 jwt:
   expiryHour: 1
   expiryDay: 14
-   ******
-   ******
+  accessKey: ${ACCESS_KEY}
+  refreshKey: ${REFRESH_KEY}
+
+
+
+
