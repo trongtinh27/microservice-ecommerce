@@ -1,1 +1,1 @@
-   *.yaml filter=hide_secrets
+**/application.yaml filter=hide_secrets
