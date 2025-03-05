@@ -35,7 +35,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/auth/login",
             "/auth/logout",
             "/auth/refresh",
-            "/seller/register"
+            "/seller/register",
+            "/email/send"
     };
 
     private static final Map<String, String> PERMISSION_MAP = Map.of(

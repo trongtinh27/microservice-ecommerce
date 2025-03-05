@@ -1,0 +1,75 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Chào mừng bạn trở thành Seller!</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                background-color: #f4f4f4;
+                padding: 20px;
+                text-align: center;
+            }
+            .container {
+                max-width: 600px;
+                background: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                margin: auto;
+            }
+            h2 {
+                color: #007bff;
+                margin-bottom: 10px;
+            }
+            p {
+                color: #333;
+                line-height: 1.6;
+            }
+            .btn {
+                display: inline-block;
+                background: #007bff;
+                color: #ffffff;
+                text-decoration: none;
+                padding: 12px 24px;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                margin-top: 20px;
+                transition: background 0.3s;
+            }
+            .btn:hover {
+                background: #0056b3;
+            }
+            .footer {
+                margin-top: 20px;
+                font-size: 14px;
+                color: #777;
+            }
+            .shop-info {
+                margin-top: 20px;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                text-align: left;
+            }
+            .shop-info strong {
+                color: #007bff;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Xin chào <span th:text="${username}"></span>,</h2>
+            <p>Chúc mừng bạn đã đăng ký thành công và trở thành Seller trên nền tảng của chúng tôi.</p>
+            <div class="shop-info">
+                <p><strong>Tên cửa hàng:</strong> <span th:text="${shopName}"></span></p>
+                <p><strong>Ngày đăng ký:</strong> <span th:text="${registrationDate}"></span></p>
+                <p><strong>Mô tả:</strong> <span th:text="${shopDescription}"></span></p>
+            </div>
+            <p>Bạn có thể bắt đầu quản lý cửa hàng của mình ngay bây giờ bằng cách truy cập vào bảng điều khiển:</p>
+            <a th:href="${dashboard_url}" class="btn">Truy cập Bảng Điều Khiển</a>
+            <p class="footer">Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+            <p class="footer">Trân trọng,<br>Đội ngũ hỗ trợ</p>
+        </div>
+    </body>
+</html>

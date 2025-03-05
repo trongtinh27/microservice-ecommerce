@@ -238,7 +238,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
     public UserStatus changeStatus(long userId, UserStatus status) {
         User user = getUserById(userId);
@@ -358,4 +357,5 @@ public class UserServiceImpl implements UserService {
         final String token = authorization.substring("Bearer ".length());
         return jwtService.extractUsername(token, ACCESS_TOKEN);
     }
+
 }

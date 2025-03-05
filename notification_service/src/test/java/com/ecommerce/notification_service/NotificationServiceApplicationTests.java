@@ -1,4 +1,4 @@
-package com.ecommerce.notification._service;
+package com.ecommerce.notification_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,0 +1,38 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: notification_service
+
+  data:
+    mongodb:
+      uri: mongodb://root:admin@localhost:27017/db_notification?authSource=admin
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration  # ? T?t SQL database
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.value.default.type: com.ecommerce.event.dto.NotificationEvent
+        spring.json.trusted.packages: "com.ecommerce.event.dto"
+
+app:
+
+  white-list: "/**,"
+  black-list: "/notification/**,"
+
+jwt:
+   ******
+
+email:
+   ******
+   ******
