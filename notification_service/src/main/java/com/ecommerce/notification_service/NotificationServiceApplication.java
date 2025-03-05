@@ -1,4 +1,4 @@
-package com.ecommerce.notification._service;
+package com.ecommerce.notification_service;
 
 import com.ecommerce.security.*;
 import org.springframework.boot.SpringApplication;

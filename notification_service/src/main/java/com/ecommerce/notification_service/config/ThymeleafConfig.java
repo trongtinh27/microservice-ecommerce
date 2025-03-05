@@ -1,4 +1,4 @@
-package com.ecommerce.notification._service.config;
+package com.ecommerce.notification_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

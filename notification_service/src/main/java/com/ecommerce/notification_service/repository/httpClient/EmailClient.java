@@ -1,7 +1,7 @@
-package com.ecommerce.notification._service.repository.httpClient;
+package com.ecommerce.notification_service.repository.httpClient;
 
-import com.ecommerce.notification._service.dto.request.EmailRequest;
-import com.ecommerce.notification._service.dto.response.EmailResponse;
+import com.ecommerce.notification_service.dto.request.EmailRequest;
+import com.ecommerce.notification_service.dto.response.EmailResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

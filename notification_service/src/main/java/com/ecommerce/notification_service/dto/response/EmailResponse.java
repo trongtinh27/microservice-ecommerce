@@ -1,4 +1,4 @@
-package com.ecommerce.notification._service.dto.response;
+package com.ecommerce.notification_service.dto.response;
 
 import lombok.Data;
 

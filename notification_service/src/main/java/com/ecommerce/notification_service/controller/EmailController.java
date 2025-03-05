@@ -1,12 +1,10 @@
-package com.ecommerce.notification._service.controller;
+package com.ecommerce.notification_service.controller;
 
 
-import com.ecommerce.event.dto.NotificationEvent;
-import com.ecommerce.notification._service.dto.request.SendEmailRequest;
-import com.ecommerce.notification._service.service.EmailService;
+import com.ecommerce.notification_service.dto.request.SendEmailRequest;
+import com.ecommerce.notification_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package com.ecommerce.notification._service.dto.request;
+package com.ecommerce.notification_service.dto.request;
 
 import lombok.Builder;
 import lombok.Data;

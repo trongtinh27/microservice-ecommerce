@@ -1,10 +1,10 @@
-package com.ecommerce.notification._service.service;
+package com.ecommerce.notification_service.service;
 
 
-import com.ecommerce.notification._service.dto.request.EmailRequest;
-import com.ecommerce.notification._service.dto.request.SendEmailRequest;
-import com.ecommerce.notification._service.dto.response.EmailResponse;
-import com.ecommerce.notification._service.repository.httpClient.EmailClient;
+import com.ecommerce.notification_service.dto.request.EmailRequest;
+import com.ecommerce.notification_service.dto.request.SendEmailRequest;
+import com.ecommerce.notification_service.dto.response.EmailResponse;
+import com.ecommerce.notification_service.repository.httpClient.EmailClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
