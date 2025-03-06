@@ -24,6 +24,25 @@ public class ProductServiceImpl implements ProductService {
     private final JwtService jwtService;
 
     @Override
+    public ProductResponse getProduct(String id) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product != null) {
+            return ProductResponse.builder()
+                    .shopId(product.getShopId())
+                    .name(product.getName())
+                    .description(product.getDescription())
+                    .categories(product.getCategories())
+                    .images(product.getCategories())
+                    .price(product.getPrice())
+                    .stock(product.getStock())
+                    .rating(product.getRating())
+                    .soldCount(product.getSoldCount())
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
     public ProductResponse createProduct(ProductRequest request) {
         Product product = Product.builder()
                 .shopId(request.getShopId())

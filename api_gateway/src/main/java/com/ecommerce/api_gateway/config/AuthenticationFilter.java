@@ -39,15 +39,19 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/email/send"
     };
 
-    private static final Map<String, String> PERMISSION_MAP = Map.of(
-            "/user/.*", "UPDATE_PROFILE",
-            "/seller/orders", "MANAGE_OWN_PRODUCTS",
-            "/seller/orders/.*", "MANAGE_OWN_PRODUCTS",
-            "/seller/products", "MANAGE_OWN_PRODUCTS",
-            "/seller/products/.*", "MANAGE_OWN_PRODUCTS",
-            "/admin/.*", "MANAGE_USERS",
-            "/super-admin/admins", "EDIT_ADMIN",
-            "/super-admin/admins/.*", "EDIT_ADMIN"
+    private static final Map<String, String> PERMISSION_MAP = Map.ofEntries(
+            Map.entry("/user/.*", "UPDATE_PROFILE"),
+            Map.entry("/seller/orders", "MANAGE_OWN_PRODUCTS"),
+            Map.entry("/seller/orders/.*", "MANAGE_OWN_PRODUCTS"),
+            Map.entry("/seller/products", "MANAGE_OWN_PRODUCTS"),
+            Map.entry("/seller/products/.*", "MANAGE_OWN_PRODUCTS"),
+            Map.entry("/order/.*", "CHECKOUT"),
+            Map.entry("/cart", "ADD_TO_CART"),
+            Map.entry("/cart/.*", "ADD_TO_CART"),
+            Map.entry("/admin/.*", "MANAGE_USERS"),
+            Map.entry("/super-admin/admins", "EDIT_ADMIN"),
+            Map.entry("/super-admin/admins/.*", "EDIT_ADMIN")
+
     );
     @Value("${app.api-prefix}")
     private String api_prefix;

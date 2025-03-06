@@ -7,6 +7,7 @@ import com.ecommerce.product_service.dto.response.ProductResponse;
 
 public interface ProductService {
 
+    ProductResponse getProduct(String id);
     ProductResponse createProduct(ProductRequest request);
     ProductResponse editProduct(EditProductRequest request);
     void deleteProductForSeller(DeleteProductRequest request);
