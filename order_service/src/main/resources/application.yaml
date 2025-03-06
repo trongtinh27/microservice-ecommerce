@@ -1,0 +1,28 @@
+server:
+  port: 8086
+
+app:
+  services:
+    cart: http://localhost:8085/cart
+    shop: http://localhost:8082
+
+  white-list: ","
+  black-list: "/orders/**,/orders**,"
+
+
+spring:
+  application:
+    name: order_service
+
+  datasource:
+    url: "jdbc:mysql://127.0.0.1:3306/order_service"
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+jwt:
+  accessKey: ${ACCESS_KEY}
