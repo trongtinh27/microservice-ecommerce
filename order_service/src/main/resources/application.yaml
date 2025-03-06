@@ -4,9 +4,10 @@ server:
 app:
   services:
     cart: http://localhost:8085/cart
+    shop: http://localhost:8082
 
   white-list: ","
-  black-list: "/order/**,"
+  black-list: "/orders/**,/orders**,"
 
 
 spring:

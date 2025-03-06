@@ -3,10 +3,7 @@ package com.ecommerce.order_service.entity;
 
 import com.ecommerce.order_service.util.OrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,6 +18,7 @@ import java.util.List;
 
 @Builder
 @Getter
+@Setter
 @Service
 @AllArgsConstructor
 @Entity
@@ -32,6 +30,8 @@ public class Order implements Serializable {
     private Long id;
 
     private long userId;
+
+    private long shopId;
 
     private BigDecimal totalPrice;
 

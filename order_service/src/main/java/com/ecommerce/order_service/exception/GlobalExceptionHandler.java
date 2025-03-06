@@ -1,5 +1,6 @@
 package com.ecommerce.order_service.exception;
 
+import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -60,7 +61,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler({InvalidDataException.class})
+    @ExceptionHandler({InvalidDataException.class, FeignException.class})
     @ResponseStatus(CONFLICT)
     public ErrorResponse handleInvalidDataException(Exception e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
