@@ -3,6 +3,7 @@ package com.ecommerce.product_service.controller;
 import com.ecommerce.product_service.dto.request.DeleteProductRequest;
 import com.ecommerce.product_service.dto.request.EditProductRequest;
 import com.ecommerce.product_service.dto.request.ProductRequest;
+import com.ecommerce.product_service.dto.response.ProductResponse;
 import com.ecommerce.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,10 @@ import static org.springframework.http.HttpStatus.*;
 public class ProductController {
     private final ProductService productService;
 
+    @GetMapping("/{id}")
+    public ProductResponse getProduct(@PathVariable String id) {
+        return productService.getProduct(id);
+    }
 
     @PostMapping("/")
     @PreAuthorize("hasAnyAuthority('Seller', 'Admin', 'Super Admin')")

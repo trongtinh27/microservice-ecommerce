@@ -15,7 +15,7 @@ spring:
 
 app:
 
-  white-list: ","
+  white-list: "/product/{id},"
   black-list: "/product/**,"
 
 jwt:
