@@ -4,7 +4,6 @@ server:
 
 app:
   services:
-    user: http://localhost:8081/user
     product: http://localhost:8083/product
   white-list: "/**,"
   black-list: ","
