@@ -20,11 +20,10 @@ public class OrderItem implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
-
+    private String imageUrl;
     private String productId;
     private long shopId;
     private String productName;

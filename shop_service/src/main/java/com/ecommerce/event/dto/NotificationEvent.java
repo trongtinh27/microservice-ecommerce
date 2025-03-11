@@ -14,5 +14,4 @@ public class NotificationEvent {
     private String recipient;
     private String templateCode;
     private Map<String, Object> data;
-
 }

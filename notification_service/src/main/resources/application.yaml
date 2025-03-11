@@ -1,6 +1,7 @@
 server:
   port: 8084
 
+
 spring:
   application:
     name: notification_service
@@ -15,18 +16,25 @@ spring:
       ddl-auto: update
 
   kafka:
+    listener:
+      ack-mode: manual
     bootstrap-servers: localhost:9094
     consumer:
       group-id: notification-group
       auto-offset-reset: earliest
+      enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.value.default.type: com.ecommerce.event.dto.NotificationEvent
-        spring.json.trusted.packages: "com.ecommerce.event.dto"
+#        spring.json.value.default.type: com.ecommerce.event.dto.NotificationEvent
+        spring.json.trusted.packages: "com.ecommerce.event.dto,event.dto"
 
 app:
-
+  services:
+    user-service.name: ${USER_SERVICE_NAME:localhost}
+    user-service.port: ${USER_SERVICE_PORT:9091}
+    shop-service.name: ${SHOP_SERVICE_NAME:localhost}
+    shop-service.port: ${SHOP_SERVICE_PORT:10092}
   white-list: "/**,"
   black-list: "/notification/**,"
 
@@ -36,3 +44,7 @@ jwt:
 email:
   sender-email: ${BREVO_EMAIL}
   api-key: ${BREVO_API-KEY}
+
+grpc:
+  server:
+    port: 10094

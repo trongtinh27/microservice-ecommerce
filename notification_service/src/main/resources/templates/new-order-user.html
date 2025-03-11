@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Confirmation</title>
+</head>
+<body
+        style="
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      padding: 20px;
+    "
+>
+<div
+        style="
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      "
+>
+    <h2 style="color: #1f2937; font-size: 24px; font-weight: bold">
+        🎉 Đơn hàng của bạn đã được xác nhận!
+    </h2>
+
+    <div
+            style="
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 15px;
+          margin-bottom: 15px;
+        "
+    >
+        <p>
+            <strong>🆔 Mã đơn hàng:</strong> <span th:text="${orderId}"></span>
+        </p>
+        <p>
+            <strong>🕒 Ngày đặt:</strong> <span th:text="${createdAt}"></span>
+        </p>
+        <p>
+            <strong>💰 Tổng tiền:</strong>
+            <span
+                    th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')}"
+            ></span>
+            ₫
+        </p>
+        <p>
+            <strong>🎟 Mã giảm giá:</strong>
+            <span th:text="${discountCode}"></span>
+        </p>
+        <p>
+            <strong>🔻 Giảm giá:</strong>
+            <span
+                    th:text="${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')}"
+            ></span>
+            ₫
+        </p>
+        <p style="font-size: 16px; font-weight: bold; color: #047857">
+            💳 Tổng thanh toán:
+            <span
+                    th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')}"
+            ></span>
+            ₫
+        </p>
+    </div>
+
+    <h3 style="color: #374151; font-size: 18px; font-weight: bold">
+        👤 Thông tin khách hàng
+    </h3>
+    <p><strong>Tên:</strong> <span th:text="${customerName}"></span></p>
+    <p>
+        <strong>📞 Số điện thoại:</strong>
+        <span th:text="${customerPhone}"></span>
+    </p>
+    <p><strong>📧 Email:</strong> <span th:text="${customerEmail}"></span></p>
+    <p>
+        <strong>🏠 Địa chỉ:</strong> <span th:text="${customerAddress}"></span>
+    </p>
+    <p>
+        <strong>💳 Phương thức thanh toán:</strong>
+        <span th:text="${paymentMethod}"></span>
+    </p>
+
+    <h3 style="color: #374151; font-size: 18px; font-weight: bold">
+        🛒 Sản phẩm đã đặt
+    </h3>
+    <div
+            style="
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 15px;
+          margin-bottom: 15px;
+        "
+    >
+        <div
+                th:each="product : ${products}"
+                style="
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 10px;
+          "
+        >
+            <img
+                    th:src="${product.imageUrl}"
+                    alt="Sản phẩm"
+                    style="
+              width: 60px;
+              height: 60px;
+              object-fit: cover;
+              border-radius: 6px;
+            "
+            />
+            <div style="margin-left: 10px">
+                <h4
+                        style="font-size: 14px; color: #111827; margin: 0"
+                        th:text="${product.productName}"
+                ></h4>
+                <p style="font-size: 12px; margin: 2px 0">
+                    Giá:
+                    <span
+                            th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}"
+                    ></span>
+                    ₫
+                </p>
+                <p style="font-size: 12px; margin: 2px 0">
+                    Số lượng: <span th:text="${product.quantity}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <a
+            href="/"
+            style="
+          display: block;
+          background-color: #2563eb;
+          color: white;
+          padding: 10px 20px;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 14px;
+          text-align: center;
+          margin-top: 20px;
+          width: fit-content;
+          margin-left: auto;
+          margin-right: auto;
+          font-weight: 500;
+        "
+    >🏠 Quay về trang chủ</a
+    >
+</div>
+</body>
+</html>

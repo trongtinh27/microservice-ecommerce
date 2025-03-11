@@ -2,25 +2,24 @@ package com.ecommerce.order_service.entity;
 
 
 import com.ecommerce.order_service.util.OrderStatus;
+import com.ecommerce.order_service.util.PaymentType;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Builder
 @Getter
 @Setter
-@Service
 @AllArgsConstructor
+@JsonSerialize
 @Entity
 @Table(name = "tbl_orders")
 @NoArgsConstructor
@@ -38,6 +37,9 @@ public class Order implements Serializable {
     @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType = PaymentType.COD;
+
     private String transactionId;
 
     private String shippingAddress;
@@ -50,7 +52,7 @@ public class Order implements Serializable {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
 

@@ -4,16 +4,13 @@ import com.ecommerce.user_service.dto.validator.GenderSubset;
 import com.ecommerce.user_service.dto.validator.PhoneNumber;
 import com.ecommerce.user_service.util.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
-import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
 @Getter
 public class UpdateUserRequest {
-    @NonNull
     private long userId;
     private String fullName;
     private String email;

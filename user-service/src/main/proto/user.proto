@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package com.ecommerce.user_service;
+
+option java_multiple_files = true;
+option java_package = "com.ecommerce.user_service.grpc";
+option java_outer_classname = "UserProto";
+
+service UserService {
+  rpc getUser(UserIdRequest) returns (UserResponse);
+}
+
+
+message UserIdRequest {
+  int64 userId = 1;
+}
+
+
+message UserResponse {
+  string userName = 1;
+  string fullName = 2;
+  string email = 3;
+  string phoneNumber = 4;
+}

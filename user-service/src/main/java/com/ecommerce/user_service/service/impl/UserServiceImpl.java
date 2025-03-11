@@ -63,21 +63,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(userName).orElse(null);
     }
 
-    private boolean isExistAccount(String userName) {
-        boolean isExist = false;
-
-        User user = getByUsername(userName);
-        if(user != null) {
-            isExist = true;
-        }
-
-        return isExist;
+    private boolean isExistAccount(String userName, String email) {
+        return userRepository.existsUserByUsernameOrEmail(userName, email);
     }
 
     @Override
     public long saveUser(SignUpRequest request, String roleName) {
-        if(isExistAccount(request.getUsername())) {
-            throw new AccountExistedException("Account already exists ");
+        if(isExistAccount(request.getUsername(), request.getEmail())) {
+            throw new AccountExistedException("Account or email already in use!");
         }
 
         Role role = roleRepository.findByName(roleName)

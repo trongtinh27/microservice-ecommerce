@@ -1,33 +1,37 @@
 package com.ecommerce.order_service.service.impl;
 
+import com.ecommerce.event.dto.OrderResponse;
+import com.ecommerce.order_service.service.ProductGrpcClient;
 import com.ecommerce.order_service.dto.request.OrderRequest;
+import com.ecommerce.order_service.dto.request.PaymentRequest;
 import com.ecommerce.order_service.dto.request.UpdateStatusRequest;
-import com.ecommerce.order_service.dto.response.CreateOrderResponse;
-import com.ecommerce.order_service.dto.response.OrderResponse;
-import com.ecommerce.order_service.dto.response.PageResponse;
-import com.ecommerce.order_service.dto.response.ShopDetailResponse;
+import com.ecommerce.order_service.dto.response.*;
+import com.ecommerce.order_service.entity.Cart;
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.entity.OrderItem;
+import com.ecommerce.order_service.exception.InsufficientStockException;
 import com.ecommerce.order_service.exception.ResourceNotFoundException;
 import com.ecommerce.order_service.repository.OrderRepository;
-import com.ecommerce.order_service.repository.httpClient.CartClient;
-import com.ecommerce.order_service.repository.httpClient.ShopClient;
+import com.ecommerce.order_service.repository.httpClient.PaymentClient;
 import com.ecommerce.order_service.service.OrderService;
+import com.ecommerce.order_service.service.RedisCartService;
+import com.ecommerce.order_service.service.ShopGrpcClient;
 import com.ecommerce.order_service.util.OrderStatus;
+import com.ecommerce.order_service.util.PaymentType;
+import com.ecommerce.order_service.util.VNPayUtil;
 import com.ecommerce.security.JwtService;
-import feign.FeignException;
+import com.ecommerce.product_service.grpc.ProductItem;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -36,59 +40,104 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final CartClient cartClient;
-    private final ShopClient shopClient;
+    private final RedisCartService redisCartService;
+    private final PaymentClient paymentClient;
     private final JwtService jwtService;
+    private final ProductGrpcClient productGrpcClient;
+    private final ShopGrpcClient shopGrpcClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
+    @Transactional
     public Object createOrder(HttpServletRequest request, OrderRequest orderRequest) {
         long userId = extractUserIdFromRequest(request);
 
-        // Lấy thông tin từ Cart Service
-        CreateOrderResponse createOrderResponse = fetchCreateOrderResponseFromCart();
+        // Lấy thông tin giỏ hàng từ Redis
+        CreateOrderResponse createOrderResponse = orderResponse(String.valueOf(userId));
 
-        // Nếu không có item trong giỏ, trả về null
-        if (createOrderResponse == null || createOrderResponse.getItems().isEmpty()) {
-            return null;
+        // Tạo danh sách kiểm tra tồn kho
+        List<ProductItem> items = createOrderResponse.getItems().stream()
+                .map(item -> ProductItem.newBuilder()
+                        .setProductId(item.getProductId())
+                        .setQuantity(item.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Kiểm tra và giảm tồn kho
+        if (!productGrpcClient.decreaseStock(items)) {
+            throw new InsufficientStockException("Insufficient stock for one or more products.");
         }
 
-        // Tạo "Order" từ dữ liệu nhận được
-        Order order = buildOrder(userId, orderRequest, createOrderResponse);
+        String transactionId = VNPayUtil.createTransaction(8); // Sinh transactionId
+        Map<Long, List<CartItem>> itemsGroupedByShop = createOrderResponse.getItems().stream()
+                .collect(Collectors.groupingBy(item -> Long.parseLong(item.getShopId())));
 
-        // Sinh transactionId duy nhất
-        String transactionId = UUID.randomUUID().toString(); // Sinh transactionId duy nhất
+        List<Order> orders = new ArrayList<>();
+        List<PaymentRequest.PaymentItem> paymentItems = new ArrayList<>();
+        long totalAmount = 0L;
 
-        order.setTransactionId(transactionId);
+        for (var entry : itemsGroupedByShop.entrySet()) {
+            long shopId = entry.getKey();
+            List<CartItem> shopCartItems = entry.getValue();
 
-        if ("COD".equals(orderRequest.getPaymentType())) {
-            order.setStatus(OrderStatus.CONFIRMED);
-        } else {
-            order.setStatus(OrderStatus.PENDING);
+            // Tạo Order
+            Order order = buildOrder(userId, orderRequest, shopCartItems);
+            order.setTransactionId(transactionId);
+            order.setShopId(shopId);
+            order.setStatus(orderRequest.getPaymentType() == PaymentType.COD
+                    ? OrderStatus.CONFIRMED
+                    : OrderStatus.PENDING);
+
+            // Cộng dồn tổng tiền nếu không phải COD
+            if (order.getStatus() == OrderStatus.PENDING) {
+                totalAmount += order.getTotalPrice().longValue();
+            }
+
+            order = orderRepository.save(order);
+            orders.add(order);
+
+            // Thêm vào danh sách thanh toán
+            paymentItems.add(PaymentRequest.PaymentItem.builder()
+                    .userId(userId)
+                    .amount(order.getTotalPrice())
+                    .orderId(order.getId())
+                    .shopId(shopId)
+                    .build());
         }
 
+        removeProductFromCart(String.valueOf(userId), items);
 
-        // Lưu Order vào database
-        order = orderRepository.save(order);
-
-
-        if ("COD".equalsIgnoreCase(String.valueOf(orderRequest.getPaymentType()))) {
-            List<OrderResponse.OrderItem> responseItems = mapOrderItemsToResponse(order);
-            return buildOrderResponse(order, responseItems);
+        // Xử lý thanh toán VNPay
+        if (orderRequest.getPaymentType() == PaymentType.VNPAY) {
+            return processVNPayPayment(transactionId, totalAmount, paymentItems);
         }
 
+        // Tạo danh sách phản hồi đơn hàng
+        List<OrderResponse> responses = orders.stream()
+                .map(order -> buildOrderResponse(order, mapOrderItemsToResponse(order)))
+                .collect(Collectors.toList());
 
-        // Thanh toán VNPay: Gọi Payment Service để trả về đường link thanh toán
-        if ("VNPay".equalsIgnoreCase(String.valueOf(orderRequest.getPaymentType()))) {
-            // Gọi Payment Service để tạo VNPay URL
-//            String paymentUrl = paymentService.createVNPayPayment(transactionId, order.getTotalPrice());
-            String paymentUrl = "paymentService.createVNPayPayment(transactionId, order.getTotalPrice())";
-            return Map.of(
-                    "transactionId", transactionId,
-                    "paymentUrl", paymentUrl
-            );
-        }
-        return null;
+        // Gửi Kafka event
+        responses.forEach(orderResponse -> kafkaTemplate.send("new-order", orderResponse));
 
+        return responses;
+    }
+
+    /**
+     * Xử lý thanh toán VNPay
+     */
+    private Map<String, String> processVNPayPayment(String transactionId, long totalAmount,
+                                                    List<PaymentRequest.PaymentItem> paymentItems) {
+        PaymentRequest paymentRequest = PaymentRequest.builder()
+                .items(paymentItems)
+                .transactionId(transactionId)
+                .orderType("Order")
+                .totalAmount(totalAmount)
+                .paymentType(PaymentType.VNPAY)
+                .build();
+
+        String paymentUrl = paymentClient.pay(paymentRequest);
+        return Map.of("transactionId", transactionId, "paymentUrl", paymentUrl);
     }
 
     @Override
@@ -104,8 +153,6 @@ public class OrderServiceImpl implements OrderService {
             OrderResponse orderResponse = buildOrderResponse(order, items);
             orders.add(orderResponse);
         });
-
-
 
         return PageResponse.builder()
                 .pageNo(pageNo)
@@ -127,66 +174,105 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse updateStatusOrder(HttpServletRequest request, long id, UpdateStatusRequest statusRequest) {
+        String token = request.getHeader("Authorization").substring("Bearer ".length());
 
-        try {
-            ShopDetailResponse shopDetailResponse = shopClient.getShop();
+        long shopId = shopGrpcClient.getShopId(token);
 
-            Order order = orderRepository.findByIdAndShopId(id, shopDetailResponse.getId()).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        Order order = orderRepository.findByIdAndShopId(id, shopId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        order.setStatus(statusRequest.getStatus());
+        orderRepository.save(order);
 
-            order.setStatus(statusRequest.getStatus());
-            orderRepository.save(order);
-
-            return buildOrderResponse(order, mapOrderItemsToResponse(order));
-        } catch (FeignException e) {
-            return null;
-        }
-
+        return buildOrderResponse(order, mapOrderItemsToResponse(order));
     }
 
     @Override
     public OrderResponse cancelOrder(HttpServletRequest request, long id) {
         long userId = extractUserIdFromRequest(request);
         Order order = orderRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        List<ProductItem> items = order.getOrderItems().stream()
+                .map(item -> ProductItem.newBuilder()
+                        .setProductId(item.getProductId())
+                        .setQuantity(item.getQuantity())
+                        .build())
+                .toList();
+        productGrpcClient.increaseStock(items);
+
         order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
         return buildOrderResponse(order, mapOrderItemsToResponse(order));
     }
+
+    @Override
+    public String changeOrderStatus(long id, OrderStatus orderStatus) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        order.setStatus(orderStatus);
+
+        if(orderStatus.equals(OrderStatus.CANCELLED)) {
+            List<ProductItem> items = order.getOrderItems().stream()
+                    .map(item -> ProductItem.newBuilder()
+                            .setProductId(item.getProductId())
+                            .setQuantity(item.getQuantity())
+                            .build())
+                    .toList();
+            productGrpcClient.increaseStock(items);
+        }
+
+        orderRepository.save(order);
+        return orderStatus.name();
+    }
+
+    @Override
+    public List<Order> getOrderByTransactionId(String transactionId) {
+        return orderRepository.getOrderByTransactionId(transactionId);
+    }
+
 
     private long extractUserIdFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring("Bearer ".length());
         return jwtService.extractUserId(token);
     }
 
-    private CreateOrderResponse fetchCreateOrderResponseFromCart() {
-        try {
-            return cartClient.createOrder(); // Gọi đến CartService qua Feign
-        } catch (FeignException e) {
-            return null; // Xử lý lỗi từ Feign client
-        }
-    }
-
-    private Order buildOrder(long userId, OrderRequest orderRequest, CreateOrderResponse createOrderResponse) {
+    private Order buildOrder(long userId, OrderRequest orderRequest, List<CartItem> cartItemList) {
+        // Khởi tạo Order
         Order order = Order.builder()
                 .userId(userId)
-                .totalPrice(createOrderResponse.getTotalPrice())
+                .paymentType(orderRequest.getPaymentType())
                 .shippingAddress(orderRequest.getShippingAddress())
+                .totalPrice(BigDecimal.ZERO) // Khởi tạo tổng giá trị là 0
                 .build();
 
-        // Thêm từng OrderItem vào Order
-        createOrderResponse.getItems().forEach(item -> {
+        // Tính tổng giá và thêm từng OrderItem vào Order
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (CartItem item : cartItemList) {
+            BigDecimal itemTotalPrice = item.getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity())) // Giá của item = Đơn giá * Số lượng
+                    .subtract(BigDecimal.valueOf(item.getDiscount() != 0.0 ? item.getDiscount() : 0.0)); // Trừ giảm giá (nếu có)
+
+            // Khởi tạo OrderItem
             OrderItem orderItem = OrderItem.builder()
                     .productId(item.getProductId())
                     .shopId(Long.parseLong(item.getShopId()))
                     .productName(item.getProductName())
+                    .imageUrl(item.getImage())
                     .quantity(item.getQuantity())
                     .price(item.getPrice())
-                    .discount(item.getDiscount())
-                    .totalPrice(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                    .discount(item.getDiscount() != 0.0 ? item.getDiscount() : 0.0)
+                    .totalPrice(itemTotalPrice) // Tổng giá của item sau khi giảm giá
                     .build();
 
-            order.addItems(orderItem); // Thêm item vào order
-        });
+            // Thêm OrderItem vào danh sách item của Order
+            order.addItems(orderItem);
+
+            // Cộng tổng giá trị của item vào tổng giá trị của Order
+            totalPrice = totalPrice.add(itemTotalPrice);
+        }
+
+        // Cập nhật tổng giá trị cho Order
+        order.setTotalPrice(totalPrice);
 
         return order;
+
     }
 
     private List<OrderResponse.OrderItem> mapOrderItemsToResponse(Order order) {
@@ -195,6 +281,7 @@ public class OrderServiceImpl implements OrderService {
                         .productId(item.getProductId())
                         .shopId(item.getShopId())
                         .productName(item.getProductName())
+                        .imageUrl(item.getImageUrl())
                         .quantity(item.getQuantity())
                         .price(item.getPrice())
                         .discount(item.getDiscount())
@@ -202,11 +289,51 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
+    private CreateOrderResponse orderResponse(String userId) {
+        // Lấy dữ liệu từ Redis
+        Cart cartData = redisCartService.get(userId);
+
+        if (cartData == null || cartData.getItems() == null || cartData.getItems().isEmpty())
+            throw new ResourceNotFoundException("Cart is empty");
+
+        // Tạo và trả về OrderResponse
+        return CreateOrderResponse.builder()
+                .userId(userId)
+                .items(cartData.getItems().stream().filter(CartItem::isChecked).toList())
+                .totalPrice(calculateTotalPrice(cartData))
+                .build();
+    }
+
+    private void removeProductFromCart(String userId, List<ProductItem> cartItemList) {
+        Cart cart = redisCartService.get(userId);
+        List<String> productIds = cartItemList.stream().map(ProductItem::getProductId).toList();
+
+        cart.getItems().removeIf(item -> productIds.contains(item.getProductId()));
+        cart.setTotalPrice(BigDecimal.ZERO);
+
+        redisCartService.save(cart);
+    }
+
+    private BigDecimal calculateTotalPrice(Cart cart) {
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (CartItem item : cart.getItems()) {
+            if (item.isChecked()) {
+                BigDecimal itemTotal = item.getPrice()
+                        .multiply(BigDecimal.valueOf(item.getQuantity()))
+                        .subtract(item.getDiscount() != 0.0 ? BigDecimal.valueOf(item.getDiscount()) : BigDecimal.ZERO);
+                totalPrice = totalPrice.add(itemTotal);
+            }
+        }
+        return totalPrice;
+    }
+
     private OrderResponse buildOrderResponse(Order order, List<OrderResponse.OrderItem> items) {
         return OrderResponse.builder()
                 .orderId(order.getId())
                 .userId(order.getUserId())
+                .paymentMethod("COD")
                 .shippingAddress(order.getShippingAddress())
+                .createAt(order.getCreatedAt())
                 .status(order.getStatus().name())
                 .totalPrice(order.getTotalPrice())
                 .transactionId(order.getTransactionId())

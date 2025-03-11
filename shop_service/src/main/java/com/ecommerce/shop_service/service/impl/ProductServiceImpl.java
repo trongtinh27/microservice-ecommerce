@@ -1,19 +1,19 @@
 package com.ecommerce.shop_service.service.impl;
 
-import com.ecommerce.security.JwtService;
+
 import com.ecommerce.shop_service.dto.request.DeleteProductRequest;
 import com.ecommerce.shop_service.dto.request.EditProductRequest;
 import com.ecommerce.shop_service.dto.request.ProductRequest;
 import com.ecommerce.shop_service.dto.response.ProductResponse;
 import com.ecommerce.shop_service.dto.response.ShopDetailResponse;
-import com.ecommerce.shop_service.dto.response.UserDetailResponse;
+import com.ecommerce.shop_service.exception.InvalidDataException;
+import com.ecommerce.shop_service.exception.ResourceExistedException;
 import com.ecommerce.shop_service.exception.ResourceNotFoundException;
-import com.ecommerce.shop_service.repository.httpClient.ProductClient;
-import com.ecommerce.shop_service.repository.httpClient.UserClient;
+import com.ecommerce.shop_service.service.ProductGrpcClient;
 import com.ecommerce.shop_service.service.ProductService;
 import com.ecommerce.shop_service.service.ShopService;
 import feign.FeignException;
-import io.micrometer.common.util.StringUtils;
+import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
-    private final ProductClient productClient;
+    private final ProductGrpcClient productClient;
     private final ShopService shopService;
 
     @Override
@@ -32,7 +32,13 @@ public class ProductServiceImpl implements ProductService{
         ShopDetailResponse shopDetailResponse = shopService.getShopByToken(token);
         productRequest.setShopId(String.valueOf(shopDetailResponse.getId()));
 
-        return productClient.createProduct(productRequest).getBody();
+        try {
+            return productClient.createProduct(productRequest);
+        } catch (StatusRuntimeException e) {
+            throw new ResourceExistedException("Product is existed!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -59,7 +65,6 @@ public class ProductServiceImpl implements ProductService{
                 .build();
 
         return productClient.deleteProduct(request);
-
     }
 
 }

@@ -3,6 +3,7 @@ package com.ecommerce.cart_service.entity;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Setter
@@ -10,7 +11,8 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CartItem {
+@ToString
+public class CartItem implements Serializable {
     private String productId;
     private String shopId;
     private String productName;

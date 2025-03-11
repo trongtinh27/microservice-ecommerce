@@ -86,6 +86,16 @@ public class ShopServiceImpl implements ShopService {
                 .build();
     }
 
+    @Override
+    public long getShopIdByToken(String token) {
+        return getShopByToken(token).getId();
+    }
+
+    @Override
+    public long getOwnerId(long shopId) {
+        return shopRepository.findShopById(shopId).getOwnerId();
+    }
+
     private long getOwnerIdFromToken(String token) {
         try {
             return jwtService.extractUserId(token);

@@ -1,5 +1,6 @@
 package com.ecommerce.shop_service;
 
+import com.ecommerce.security.AuthenticationRequestInterceptor;
 import com.ecommerce.security.JwtService;
 import com.ecommerce.security.PreFilter;
 import com.ecommerce.security.SecurityConfig;
@@ -10,7 +11,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({SecurityConfig.class, PreFilter.class, JwtService.class})
+@Import({SecurityConfig.class, PreFilter.class, JwtService.class, AuthenticationRequestInterceptor.class})
 @EnableFeignClients
 public class ShopServiceApplication {
 	public static void main(String[] args) {

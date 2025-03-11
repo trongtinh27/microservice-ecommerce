@@ -1,8 +1,15 @@
 server:
   port: 8082
 
+grpc:
+  server:
+    port: 10092
+
+
 app:
   services:
+    product-service.name: ${PRODUCT_SERVICE_NAME:localhost}
+    product-service.port: ${PRODUCT_SERVICE_PORT:9093}
     user: http://localhost:8081/user
     product: http://localhost:8083/product
   white-list: "/seller/register,"
@@ -27,5 +34,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 jwt:
-  accessKey: ${ACCESS_KEY}
+  accessKey: ${ACCESS_KEY:}

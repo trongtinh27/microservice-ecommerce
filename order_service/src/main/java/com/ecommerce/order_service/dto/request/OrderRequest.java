@@ -13,5 +13,6 @@ import org.springframework.validation.annotation.Validated;
 public class OrderRequest {
     @NotNull
     private String shippingAddress;
+    private String phoneNumber;
     private PaymentType paymentType;
 }
