@@ -30,8 +30,8 @@ public class NotificationController {
     private final UserGrpcClient userGrpcClient;
     private final ShopGrpcClient shopGrpcClient;
 
-    @KafkaListener(topics = "shop-created")
-    public void listen(NotificationEvent notificationEvent) {
+    @KafkaListener(topics = "shop-created", containerFactory = "kafkaListenerContainerFactory")
+    public void listen(NotificationEvent notificationEvent, Acknowledgment ack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", notificationEvent.getData().get("userName"));
         properties.put("shopName", notificationEvent.getData().get("shopName"));
@@ -41,7 +41,7 @@ public class NotificationController {
         Context context = new Context();
         context.setVariables(properties);
 
-        String html = templateEngine.process("new-order", context);
+        String html = templateEngine.process("shop-created", context);
 
         SendEmailRequest request = SendEmailRequest.builder()
                 .to(EmailRequest.Recipient.builder()
@@ -53,6 +53,9 @@ public class NotificationController {
                 .build();
 
         emailService.sendEmail(request);
+
+        ack.acknowledge();
+
     }
 
     @KafkaListener(topics = "new-order", containerFactory = "kafkaListenerContainerFactory")
