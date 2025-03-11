@@ -8,4 +8,7 @@ public interface ShopService {
     ShopDetailResponse sellerRegister(SignUpRequest request);
 
     ShopDetailResponse getShopByToken(String token);
+
+    long getOwnerId(long shopId);
+    long getShopIdByToken(String token);
 }

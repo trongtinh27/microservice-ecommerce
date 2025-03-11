@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 @Data
 public class ProductResponse {
+    private String id;
     private String shopId;
     private String name;
     private String description;

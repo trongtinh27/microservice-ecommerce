@@ -1,10 +1,14 @@
 server:
   port: 8086
 
+
 app:
   services:
-    cart: http://localhost:8085/cart
-    shop: http://localhost:8082
+    product-service.name: ${PRODUCT_SERVICE_NAME:localhost}
+    product-service.port: ${PRODUCT_SERVICE_PORT:9093}
+    shop-service.name: ${SHOP_SERVICE_NAME:localhost}
+    shop-service.port: ${SHOP_SERVICE_PORT:10092}
+    payment: http://localhost:8087/payment
 
   white-list: ","
   black-list: "/orders/**,/orders**,"
@@ -23,6 +27,14 @@ spring:
     hibernate:
       ddl-auto: update
 
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 jwt:
-  accessKey: ${ACCESS_KEY}
+  accessKey: ${ACCESS_KEY:}
+grpc:
+  server:
+    port: 10096

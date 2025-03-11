@@ -23,9 +23,6 @@ public class EmailService {
     private String senderEmail;
 
     public EmailResponse sendEmail(SendEmailRequest sendEmailRequest) {
-
-
-
         EmailRequest request = EmailRequest.builder()
                 .sender(EmailRequest.Sender.builder()
                         .name("Ecommerce-ShopeeMini")

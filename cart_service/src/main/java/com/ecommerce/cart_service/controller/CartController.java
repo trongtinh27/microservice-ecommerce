@@ -55,8 +55,4 @@ public class CartController {
         return new ResponseEntity<>(cartService.clearCart(request), OK);
     }
 
-    @GetMapping("/createOrder")
-    public CreateOrderResponse createOder(HttpServletRequest request) {
-        return cartService.createOrder(request);
-    }
 }

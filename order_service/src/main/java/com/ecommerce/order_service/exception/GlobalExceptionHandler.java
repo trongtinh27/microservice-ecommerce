@@ -18,7 +18,9 @@ import static org.springframework.http.HttpStatus.*;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({ConstraintViolationException.class,
-            MissingServletRequestParameterException.class, MethodArgumentNotValidException.class})
+            MissingServletRequestParameterException.class,
+            MethodArgumentNotValidException.class,
+            InsufficientStockException.class})
     @ResponseStatus(BAD_REQUEST)
     public ErrorResponse handleValidationException(Exception e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
@@ -39,7 +41,11 @@ public class GlobalExceptionHandler {
         } else if (e instanceof ConstraintViolationException) {
             errorResponse.setError("Invalid Parameter");
             errorResponse.setMessage(message.substring(message.indexOf(" ") + 1));
-        } else {
+        } else if (e instanceof InsufficientStockException) {
+            errorResponse.setError("Bad Request");
+            errorResponse.setMessage(message);
+        }
+        else {
             errorResponse.setError("Invalid Data");
             errorResponse.setMessage(message);
         }

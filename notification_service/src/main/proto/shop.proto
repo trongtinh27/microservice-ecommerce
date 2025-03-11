@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.ecommerce.shop_service;
+
+option java_multiple_files = true;
+option java_package = "com.ecommerce.shop_service.grpc";
+option java_outer_classname = "ShopProto";
+
+service ShopService {
+  rpc getOwnerId(GetOwnerIdRequest)  returns (GetOwnerIdResponse);
+}
+
+message GetOwnerIdRequest {
+  int64 shopId = 1;
+}
+
+message GetOwnerIdResponse {
+  int64 ownerId = 1;
+}

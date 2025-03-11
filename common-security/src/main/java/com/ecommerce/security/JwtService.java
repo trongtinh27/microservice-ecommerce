@@ -3,6 +3,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ import java.util.function.Function;
 public class JwtService {
     @Value("${jwt.accessKey}")
     private String accessKey;
-
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

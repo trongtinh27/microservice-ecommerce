@@ -9,17 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="common-security" />
       </profile>
-      <profile name="Annotation profile for user-service" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
-        </processorPath>
-        <module name="user-service" />
-      </profile>
-      <profile name="Annotation profile for order_service" enabled="true">
+      <profile name="Annotation profile for payment_service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -28,10 +18,12 @@
         </processorPath>
         <module name="cart_service" />
         <module name="order_service" />
+        <module name="payment_service" />
+        <module name="notification_service" />
+        <module name="user-service" />
         <module name="api_gateway" />
         <module name="shop_service" />
         <module name="product_service" />
-        <module name="notification_service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -41,6 +33,7 @@
       <module name="cart_service" options="-parameters" />
       <module name="notification_service" options="-parameters" />
       <module name="order_service" options="-parameters" />
+      <module name="payment_service" options="-parameters" />
       <module name="product_service" options="-parameters" />
       <module name="shop_service" options="-parameters" />
       <module name="user-service" options="-parameters" />

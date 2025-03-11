@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+package com.ecommerce.shop_service;
+
+option java_multiple_files = true;
+option java_package = "com.ecommerce.order_service.grpc";
+option java_outer_classname = "OrderProto";
+
+service OrderService {
+  rpc changeOrderStatus(ChangeOrderStatusRequest) returns (ChangeOrderStatusResponse);
+  rpc getOderByTransactionId(GetOrderRequest) returns  (ListOrderResponse);
+}
+
+
+message ChangeOrderStatusRequest {
+  int64 orderId = 1;
+  string status = 2;
+
+}
+
+message ChangeOrderStatusResponse {
+  string status = 1;
+}
+
+message GetOrderRequest {
+  string transactionId = 1;
+}
+
+message OrderItemResponse {
+  string productId = 1;
+  int64 shopId = 2;
+  string productName = 3;
+  string imageUrl = 4;
+  int32 quantity = 5;
+  string price = 6;
+  double discount = 7;
+}
+
+message OrderResponse {
+  int64 orderId = 1;
+  int64 userId = 2;
+  string shippingAddress = 3;
+  string status = 4;
+  google.protobuf.Timestamp createdAt = 5;
+  string paymentMethod = 6;
+  string totalPrice = 7;
+  string transactionId = 8;
+  repeated OrderItemResponse items = 9;
+}
+
+message ListOrderResponse {
+  repeated OrderResponse orders = 1;
+}

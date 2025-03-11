@@ -42,7 +42,7 @@ public class OrderController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAnyAuthority('Seller')")
     public ResponseEntity<?> updateStatusOrder(HttpServletRequest request, @PathVariable long id, @RequestBody UpdateStatusRequest status) {
-        return new ResponseEntity<>(orderService.updateStatusOrder(request, id, status));
+        return new ResponseEntity<>(orderService.updateStatusOrder(request, id, status), OK);
     }
 
     @DeleteMapping("/{id}")

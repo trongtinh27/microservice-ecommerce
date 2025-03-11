@@ -32,7 +32,6 @@ public class CartServiceImpl implements CartService {
     public Cart getCart(HttpServletRequest request) {
         try {
             long userId = jwtService.extractUserId(request.getHeader("Authorization").substring("Bearer ".length()));
-
             return redisCartService.get(String.valueOf(userId));
 
         } catch (Exception e) {
@@ -54,7 +53,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = getCart(request);
         cart.getItems().clear();
         cart.setTotalPrice(BigDecimal.valueOf(0));
-        redisCartService.save(cart);
+        redisCartService.remove(String.valueOf(userId));
         return cart;
     }
 
@@ -109,6 +108,9 @@ public class CartServiceImpl implements CartService {
 
         cart.setTotalPrice(calculateTotalPrice(cart));
 
+
+
+
         // Lưu giỏ hàng lại vào Redis
         saveCart(cart);
 
@@ -158,23 +160,6 @@ public class CartServiceImpl implements CartService {
         return cart;
     }
 
-    @Override
-    public CreateOrderResponse createOrder(HttpServletRequest request) {
-        Cart cart = getCart(request);
-        if(cart != null) {
-            List<CartItem> items = cart.getItems().stream()
-                    .filter(CartItem::isChecked)
-                    .toList();
-
-            return CreateOrderResponse.builder()
-                    .userId(cart.getUserId())
-                    .items(items)
-                    .totalPrice(calculateTotalPrice(cart))
-                    .build();
-        }
-
-        return null;
-    }
 
     private int checkQuantity(int quantity, int maxQuantity) {
         return Math.min(quantity, maxQuantity);

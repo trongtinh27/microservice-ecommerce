@@ -1,7 +1,16 @@
 server:
   port: 8081
 
+grpc:
+  server:
+    port: 10091
+    security:
+      auth:
+        enabled: false
+
 spring:
+  autoconfigure:
+    exclude: net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration
   application:
     name: user-service
 
@@ -18,8 +27,8 @@ spring:
 jwt:
   expiryHour: 1
   expiryDay: 14
-  accessKey: ${ACCESS_KEY}
-  refreshKey: ${REFRESH_KEY}
+  accessKey: ${ACCESS_KEY:}
+  refreshKey: ${REFRESH_KEY:}
 
 
 

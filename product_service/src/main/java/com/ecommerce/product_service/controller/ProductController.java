@@ -5,6 +5,8 @@ import com.ecommerce.product_service.dto.request.EditProductRequest;
 import com.ecommerce.product_service.dto.request.ProductRequest;
 import com.ecommerce.product_service.dto.response.ProductResponse;
 import com.ecommerce.product_service.service.ProductService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{id}")
-    public ProductResponse getProduct(@PathVariable String id) {
+    public ProductResponse getProduct(@PathVariable @NotNull String id) {
         return productService.getProduct(id);
     }
 
@@ -33,22 +35,21 @@ public class ProductController {
 
     @PostMapping("/edit")
     @PreAuthorize("hasAnyAuthority('Seller', 'Admin', 'Super Admin')")
-    public ResponseEntity<?> editProduct(@RequestBody EditProductRequest request) {
+    public ResponseEntity<?> editProduct(@RequestBody @Valid EditProductRequest request) {
         return new ResponseEntity<>(productService.editProduct(request), OK);
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('Seller')")
-    public ResponseEntity<?> deleteProductForSeller(@RequestBody DeleteProductRequest request) {
+    public ResponseEntity<?> deleteProductForSeller(@RequestBody @Valid DeleteProductRequest request) {
         productService.deleteProductForSeller(request);
         return new ResponseEntity<>("Deleted", OK);
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyAuthority('Admin', 'Super Admin')")
-    public ResponseEntity<?> deleteProductForAdmin(@PathVariable String id) {
+    public ResponseEntity<?> deleteProductForAdmin(@PathVariable @NotNull String id) {
         productService.deleteProductForAdmin(id);
         return new ResponseEntity<>("Deleted", OK);
     }
-
 }

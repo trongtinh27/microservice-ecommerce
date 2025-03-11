@@ -1,0 +1,43 @@
+server:
+  port: 8087
+
+app:
+  services:
+    order-service.name: ${ORDER_SERVICE_NAME:localhost}
+    order-service.port: ${ORDER_SERVICE_PORT:10096}
+  white-list: "/payment/vn-pay-callback,"
+  black-list: "/payment/**,"
+
+
+
+spring:
+  application:
+    name: payment_service
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  datasource:
+    url: "jdbc:mysql://127.0.0.1:3306/payment_service"
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+jwt:
+  accessKey: ${ACCESS_KEY:}
+
+payment:
+  vnPay:
+    url: ${VNPAY_URL}
+    tmnCode: ${TMN_CODE}
+    secretKey: ${SECRET_KEY}
+    returnUrl: ${RETURN_URL}
+    version: ${VERSION}
+    command: ${COMMAND}
