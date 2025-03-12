@@ -105,7 +105,7 @@ public class ProductGrpcImpl extends ProductServiceGrpc.ProductServiceImplBase {
                 .setDescription(productResponse.getDescription())
                 .addAllCategories(productResponse.getCategories())
                 .addAllImages(productResponse.getImages())
-                .setPrice(productResponse.toString())
+                .setPrice(productResponse.getPrice().toString())
                 .setStock(productResponse.getStock())
                 .setRating(productResponse.getRating())
                 .setSoldCount(productResponse.getSoldCount())
