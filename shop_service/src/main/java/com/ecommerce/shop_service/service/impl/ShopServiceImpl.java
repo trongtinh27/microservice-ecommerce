@@ -1,6 +1,7 @@
 package com.ecommerce.shop_service.service.impl;
 
 import com.ecommerce.event.dto.NotificationEvent;
+import com.ecommerce.event.dto.ShopEvent;
 import com.ecommerce.security.JwtService;
 import com.ecommerce.shop_service.dto.request.SignUpRequest;
 import com.ecommerce.shop_service.dto.response.ShopDetailResponse;
@@ -57,6 +58,7 @@ public class ShopServiceImpl implements ShopService {
                     .build();
 
             kafkaTemplate.send("shop-created", notificationEvent);
+            sendShopEvent(shop, request.getAddresses().toString());
 
             return ShopDetailResponse.builder()
                     .id(shop.getId())
@@ -102,6 +104,17 @@ public class ShopServiceImpl implements ShopService {
         } catch (Exception e) {
             throw new InvalidDataException("Invalid token");
         }
+    }
+
+    private void sendShopEvent(Shop shop, String address) {
+        kafkaTemplate.send("shop-event", ShopEvent.builder()
+                .id(shop.getId().toString())
+                .name(shop.getName())
+                .description(shop.getDescription())
+                .location(address)
+                .rating(0.0)
+                .operation("CREATE")
+                .build());
     }
 
 
