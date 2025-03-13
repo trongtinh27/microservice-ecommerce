@@ -1,5 +1,6 @@
 package com.ecommerce.product_service.service.impl;
 
+import com.ecommerce.event.dto.ProductEvent;
 import com.ecommerce.product_service.dto.request.DeleteProductRequest;
 import com.ecommerce.product_service.dto.request.EditProductRequest;
 import com.ecommerce.product_service.dto.request.ProductRequest;
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final MongoTemplate mongoTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public ProductResponse getProduct(String id) {
@@ -65,6 +68,9 @@ public class ProductServiceImpl implements ProductService {
                 .soldCount(0)
                 .build();
         product = productRepository.save(product);
+
+        sendEvent(product, "CREATE");
+
         return ProductResponse.builder()
                 .id(product.get_id())
                 .shopId(product.getShopId())
@@ -80,6 +86,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductResponse editProduct(EditProductRequest request) {
         Query query = new Query(Criteria.where("_id").is(request.getId()).and("shopId").is(request.getShopId()));
         Update update = new Update();
@@ -92,17 +99,24 @@ public class ProductServiceImpl implements ProductService {
         if (request.getStock() != 0) update.set("stock", request.getStock());
 
         Product updatedProduct = mongoTemplate.findAndModify(query, update, Product.class);
-        return updatedProduct != null ? convertProductToProductResponse(updatedProduct) : null;
+        if(updatedProduct != null) {
+            sendEvent(updatedProduct, "UPDATE");
+            return convertProductToProductResponse(updatedProduct);
+        }
+        return null;
     }
 
     @Override
     public void deleteProductForSeller(DeleteProductRequest request) {
         productRepository.deleteBy_idAndShopId(request.getProductId(), request.getShopId());
+        sendEvent(Product.builder()._id(request.getProductId()).build(), "DELETE");
     }
 
     @Override
     public void deleteProductForAdmin(String id) {
         productRepository.deleteById(id);
+        sendEvent(Product.builder()._id(id).build(), "DELETE");
+
     }
 
 
@@ -167,5 +181,18 @@ public class ProductServiceImpl implements ProductService {
                 .rating(product.getRating())
                 .soldCount(product.getSoldCount())
                 .build();
+    }
+
+    private void sendEvent(Product product, String operation) {
+        kafkaTemplate.send("product-event", ProductEvent.builder()
+                .id(product.get_id())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .shopId(product.getShopId())
+                .images(product.getImages())
+                .tags(product.getCategories())
+                .operation(operation)
+                .build());
     }
 }

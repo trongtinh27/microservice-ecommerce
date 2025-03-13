@@ -41,7 +41,7 @@ public class NotificationController {
         Context context = new Context();
         context.setVariables(properties);
 
-        String html = templateEngine.process("new-order", context);
+        String html = templateEngine.process("shop-created", context);
 
         SendEmailRequest request = SendEmailRequest.builder()
                 .to(EmailRequest.Recipient.builder()

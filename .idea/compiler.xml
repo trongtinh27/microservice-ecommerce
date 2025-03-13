@@ -8,8 +8,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="common-security" />
+        <module name="search_service" />
       </profile>
-      <profile name="Annotation profile for payment_service" enabled="true">
+      <profile name="Annotation profile for user-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -35,6 +36,7 @@
       <module name="order_service" options="-parameters" />
       <module name="payment_service" options="-parameters" />
       <module name="product_service" options="-parameters" />
+      <module name="search_service" options="-parameters" />
       <module name="shop_service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>
