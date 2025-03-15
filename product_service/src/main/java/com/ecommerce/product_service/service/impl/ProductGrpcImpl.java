@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -63,11 +64,12 @@ public class ProductGrpcImpl extends ProductServiceGrpc.ProductServiceImplBase {
                 .shopId(request.getShopId())
                 .name(request.getName())
                 .description(request.getDescription())
-                .images(request.getImagesList().stream().toList())
-                .categories(request.getCategoriesList().stream().toList())
+                .images(Optional.of(request.getImagesList().stream().toList()).orElse(null))
+                .categories(Optional.of(request.getCategoriesList().stream().toList()).orElse(null))
                 .price(new BigDecimal(request.getPrice()))
                 .stock(request.getStock())
                 .build();
+
 
         com.ecommerce.product_service.dto.response.ProductResponse productResponse = productService.editProduct(editProductRequest);
 

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -65,8 +67,9 @@ public class ProductGrpcClient {
                 .setDescription(editProductRequest.getDescription())
                 .setPrice(editProductRequest.getPrice().toString())
                 .setStock(editProductRequest.getStock())
-                .addAllCategories(editProductRequest.getCategories())
-                .addAllImages(editProductRequest.getImages())
+                .addAllCategories(Optional.ofNullable(editProductRequest.getCategories()).orElse(Collections.emptyList()))
+                .addAllImages(Optional.ofNullable(editProductRequest.getImages()).orElse(Collections.emptyList()))
+
                 .build();
 
         return convertToProductResponse(productServiceStub.editProduct(request));

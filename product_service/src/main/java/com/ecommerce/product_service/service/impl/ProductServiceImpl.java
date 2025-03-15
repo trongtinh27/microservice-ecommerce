@@ -93,8 +93,8 @@ public class ProductServiceImpl implements ProductService {
 
         if (request.getName() != null) update.set("name", request.getName());
         if (request.getDescription() != null) update.set("description", request.getDescription());
-        if (request.getCategories() != null) update.set("categories", request.getCategories());
-        if (request.getImages() != null) update.set("images", request.getImages());
+        if (request.getCategories() != null && !request.getCategories().isEmpty()) update.set("categories", request.getCategories());
+        if (request.getImages() != null && !request.getImages().isEmpty()) update.set("images", request.getImages());
         if (request.getPrice() != null) update.set("price", request.getPrice());
         if (request.getStock() != 0) update.set("stock", request.getStock());
 
@@ -171,11 +171,12 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductResponse convertProductToProductResponse(Product product) {
         return ProductResponse.builder()
+                .id(product.get_id())
                 .shopId(product.getShopId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .categories(product.getCategories())
-                .images(product.getCategories())
+                .images(product.getImages())
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .rating(product.getRating())

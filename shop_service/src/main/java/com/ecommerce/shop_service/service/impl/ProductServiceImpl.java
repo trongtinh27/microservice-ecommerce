@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService{
         ShopDetailResponse shopDetailResponse = shopService.getShopByToken(token);
         request.setId(id);
         request.setShopId(String.valueOf(shopDetailResponse.getId()));
-
+        System.out.println("request: " + request);
         try {
             return productClient.editProduct(request);
         } catch (FeignException e){

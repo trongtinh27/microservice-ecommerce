@@ -9,14 +9,14 @@ grpc:
         enabled: false
 
 spring:
-  data:
-    redis:
-      host: oregon-keyvalue.render.com
-      port: 6379
-      username: red-cv812oij1k6c73bj4im0
-      password: EyTff9MupImgqogVYjAwu5B2Ivn5vs9S
-      ssl:
-        enabled: true
+#  data:
+#    redis:
+#      host: oregon-keyvalue.render.com
+#      port: 6379
+#      username: red-cv812oij1k6c73bj4im0
+#      password: EyTff9MupImgqogVYjAwu5B2Ivn5vs9S
+#      ssl:
+#        enabled: true
 
   autoconfigure:
     exclude: net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration
